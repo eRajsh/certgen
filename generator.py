@@ -8,7 +8,7 @@ from textcloud import TextCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from PIL import Image, ImageShow, ImageDraw, ImageFont
+from PIL import Image, ImageShow, ImageDraw, ImageFont, ImageFilter
 import cv2
 from sketchify import sketch
 
@@ -32,7 +32,35 @@ SKETCHSIZE = (700, 700)
 def gen_sketch():
     sketch.normalsketch(PHOTOPATH+TEAMMEMBERNAME+'.png', OFOLDERPATH, TEAMMEMBERNAME+'_sketch', 10)
 
+#soften image edges
+def soften_edges(sketch_file):
+    # Open an image
+    RADIUS = 20
 
+    # Open an image
+    im = Image.open(sketch_file)
+
+    # Paste image on white background
+    diam = 2 * RADIUS
+    back = Image.new('RGB', (im.size[0] + diam, im.size[1] + diam), (255, 255, 255))
+    back.paste(im, (RADIUS, RADIUS))
+
+    # Create paste mask
+    mask = Image.new('L', back.size, 0)
+    draw = ImageDraw.Draw(mask)
+    x0, y0 = 0, 0
+    x1, y1 = back.size
+    for d in range(diam + RADIUS):
+        x1, y1 = x1 - 1, y1 - 1
+        alpha = 255 if d < RADIUS else int(255 * (diam + RADIUS - d) / diam)
+        draw.rectangle([x0, y0, x1, y1], outline=alpha)
+        x0, y0 = x0 + 1, y0 + 1
+
+    # Blur image and paste blurred edge according to mask
+    blur = back.filter(ImageFilter.GaussianBlur(RADIUS / 2))
+    back.paste(blur, mask=mask)
+    back.save(sketch_file)
+    
 # Generate Cloud
 def gen_cloud():
 
