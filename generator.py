@@ -114,8 +114,10 @@ def gen_cert():
     textcloud = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_cloud.png')
     cert.paste(textcloud, (-100, 1250), textcloud)
 
-    # Merge sketch on the background
-    sktch = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_sketch.png')
+    # Soften the sketch egdes and merge sketch on the background
+    sketchfile = OFOLDERPATH+TEAMMEMBERNAME+'_sketch.png'
+    soften_edges(sketchfile)
+    sktch = Image.open(sketchfile)
     sktch = sktch.resize(SKETCHSIZE)
     cert.paste(sktch, (50, 50))
 
@@ -129,8 +131,7 @@ def gen_cert():
     d = ImageDraw.Draw(cert)
     d.text((860, 125), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(247, 155, 68))
 
-
-    # Manager's sign
+    # Signature
     sigfont = ImageFont.truetype(SIGNATUREFONT, 80)
     d.text((1600, 2900), MGRNAME, font=sigfont, fill=(247, 155, 68))
 
