@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image, ImageShow, ImageDraw, ImageFont, ImageFilter
 import cv2
 from sketchify import sketch
+import argparse
+from os import path
 
 # define all variables
 PHOTOPATH = ''
@@ -27,15 +29,10 @@ CERTPATH = ''
 CLOUDMASK = ''
 MASKOUTLINE = ''
 SKETCHSIZE = (700, 700)
-
-# generate sketch
-def gen_sketch():
-    sketch.normalsketch(PHOTOPATH+TEAMMEMBERNAME+'.png', OFOLDERPATH, TEAMMEMBERNAME+'_sketch', 10)
-
 #soften image edges
 def soften_edges(sketch_file):
     # Open an image
-    RADIUS = 20
+    RADIUS = 30
 
     # Open an image
     im = Image.open(sketch_file)
@@ -60,7 +57,99 @@ def soften_edges(sketch_file):
     blur = back.filter(ImageFilter.GaussianBlur(RADIUS / 2))
     back.paste(blur, mask=mask)
     back.save(sketch_file)
-    
+
+# soften two bottom edges
+def soften_2_edges(sketch_file):
+    argparser = argparse.ArgumentParser()
+
+    # argparser.add_argument('input_file', help='File to add faded edges to')
+    argparser.add_argument('fade_size', type=int, nargs='?', help='Amount of pixels to blur', default=20)
+    argparser.add_argument('-t', '--top', action='store_true', help='Fade the top edge')
+    argparser.add_argument('-r', '--right', action='store_true', help='Fade the right edge')
+    argparser.add_argument('-b', '--bottom', action='store_true', help='Fade the bottom edge')
+    argparser.add_argument('-l', '--left', action='store_true', help='Fade the left edge')
+    argparser.add_argument('-f', '--flatten', action='store_true', help='Composite to white')
+
+    args = argparser.parse_args()
+
+    im = Image.open(sketch_file)
+    print('s2e '+sketch_file)
+    path_to_im = path.dirname(OFOLDERPATH)
+    # im_filename_without_extension = path.splitext(path.basename(args.input_file))[0]
+    # im = im.convert('RGBA')
+    settings = {}
+
+    if not args.top and not args.right and not args.bottom and not args.left:
+        settings['sides'] = ['Right', 'Bottom']
+    else:
+        settings['sides'] = []
+        if args.top:
+            settings['sides'].append('Top')
+        if args.right:
+            settings['sides'].append('Right')
+        if args.bottom:
+            settings['sides'].append('Bottom')
+        if args.left:
+            settings['sides'].append('Left')
+    settings['fadesize'] = args.fade_size
+
+    fadesize = settings['fadesize']
+
+    if fadesize % 2 is not 0:
+        fadesize = int(fadesize)
+        fadesize += 1
+
+    def draw_top(pic, drawpic, border_size):
+        drawpic.rectangle([0, 0, pic.size[0], border_size * 3], fill='black')
+
+    def draw_right(pic, drawpic, border_size):
+        drawpic.rectangle([pic.size[0] - border_size * 3, 0, pic.size[0], pic.size[1]], fill='black')
+
+    def draw_bottom(pic, drawpic, border_size):
+        drawpic.rectangle([0, pic.size[1] - border_size * 3, pic.size[0], pic.size[1]], fill='black')
+
+    def draw_left(pic, drawpic, border_size):
+        drawpic.rectangle([0, 0, border_size * 3, pic.size[1]], fill='black')
+
+    im_mask = Image.new('L', (im.size[0] + fadesize, im.size[1] + fadesize), 'white')
+
+    drawmask = ImageDraw.Draw(im_mask)
+
+    if 'Top' in settings['sides']:
+        draw_top(im_mask, drawmask, fadesize)
+    if 'Right' in settings['sides']:
+        draw_right(im_mask, drawmask, fadesize)
+    if 'Bottom' in settings['sides']:
+        draw_bottom(im_mask, drawmask, fadesize)
+    if 'Left' in settings['sides']:
+        draw_left(im_mask, drawmask, fadesize)
+
+    im_mask_blur = im_mask.filter(ImageFilter.GaussianBlur(radius=fadesize))
+
+    im_mask_blur_crop = im_mask_blur.crop(box=(int(fadesize / 2), int(fadesize / 2),
+                                               im_mask_blur.size[0] - int(fadesize / 2),
+                                               im_mask_blur.size[1] - int(fadesize / 2)
+                                               )
+                                          )
+
+    im_with_alpha = im.putalpha(im_mask_blur_crop)
+    im.save(path.join(path_to_im, TEAMMEMBERNAME+'_sketch.png'))
+    # output_filename = "John Smith" + '_faded.png'
+    # output_path = path.join(path_to_im, output_filename)
+    #
+    # if args.flatten:
+    #     background = Image.new("RGB", im.size, (255, 255, 255))
+    #     background.paste(im, mask=im.split()[3])
+    #     background.save(output_path)
+    # else:
+    #     im.save(output_path)
+
+
+# generate sketch
+def gen_sketch():
+    sketch.normalsketch(PHOTOPATH+TEAMMEMBERNAME+'.png', OFOLDERPATH, TEAMMEMBERNAME+'_sketch', 10)
+
+
 # Generate Cloud
 def gen_cloud():
 
@@ -92,8 +181,10 @@ def gen_cloud():
                           mode = 'RGBA',
                           min_font_size=20,
                           max_font_size=400,
-                          contour_color = "white",
                           font_path= FONT,
+                          repeat = True,
+                          colormap='Blues',
+                          # color_func=partial(palette_color_func, palette=5)
                           mask=custom_mask).generate(strength_frequency)
 
     #save to file
@@ -104,19 +195,20 @@ def gen_cloud():
 
 # Generate the Certificate
 def gen_cert():
-
     # Merge cloud outline on the background
-    cloudoutline = Image.open(MASKOUTLINE)
+    # cloudoutline = Image.open(MASKOUTLINE)
     cert = Image.open(BG)
-    cert.paste(cloudoutline, (-60, 1100), cloudoutline)
+    # cert.paste(cloudoutline, (-60, 1100), cloudoutline)
 
     # Merge Textcloud on the background
     textcloud = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_cloud.png')
-    cert.paste(textcloud, (-100, 1250), textcloud)
+    # cert.paste(textcloud, (-100, 1250), textcloud)
+    # cert.paste(textcloud, (-175, 1100), textcloud)
+    cert.paste(textcloud, (200, 400), textcloud)
 
     # Soften the sketch egdes and merge sketch on the background
     sketchfile = OFOLDERPATH+TEAMMEMBERNAME+'_sketch.png'
-    soften_edges(sketchfile)
+    soften_2_edges(sketchfile)
     sktch = Image.open(sketchfile)
     sktch = sktch.resize(SKETCHSIZE)
     cert.paste(sktch, (50, 50))
@@ -126,12 +218,12 @@ def gen_cert():
     d = ImageDraw.Draw(cert)
     d.text((885, 50), "Thank you ", font=font, fill=(247, 155, 68))
 
-    # Write Name!
+    # Write Name
     font = ImageFont.truetype(FONT, 250)
     d = ImageDraw.Draw(cert)
     d.text((860, 125), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(247, 155, 68))
 
-    # Signature
+    # Manager's sign
     sigfont = ImageFont.truetype(SIGNATUREFONT, 80)
     d.text((1600, 2900), MGRNAME, font=sigfont, fill=(247, 155, 68))
 
