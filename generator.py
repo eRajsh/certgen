@@ -58,7 +58,7 @@ def soften_edges(sketch_file):
     back.paste(blur, mask=mask)
     back.save(sketch_file)
 
-# soften two bottom edges
+# soften two bottom edges (code from catichenor/fade-edges.py)
 def soften_2_edges(sketch_file):
     argparser = argparse.ArgumentParser()
 
