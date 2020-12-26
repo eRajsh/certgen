@@ -5,14 +5,18 @@ from PIL import Image
 
 # importing all necessery modules
 from textcloud import TextCloud, STOPWORDS
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from PIL import Image, ImageShow, ImageDraw, ImageFont, ImageFilter
-import cv2
+from PIL import Image, ImageShow, ImageDraw, ImageFont
 from sketchify import sketch
+import cv2
+import numpy as np
+from PIL import Image
+from PIL import ImageFilter
+from PIL import ImageDraw
+
 import argparse
 from os import path
+
+import random
 
 # define all variables
 PHOTOPATH = ''
@@ -29,6 +33,8 @@ CERTPATH = ''
 CLOUDMASK = ''
 MASKOUTLINE = ''
 SKETCHSIZE = (700, 700)
+
+
 #soften image edges
 def soften_edges(sketch_file):
     # Open an image
@@ -183,7 +189,7 @@ def gen_cloud():
                           max_font_size=400,
                           font_path= FONT,
                           repeat = True,
-                          colormap='Blues',
+                          colormap='Set3',
                           # color_func=partial(palette_color_func, palette=5)
                           mask=custom_mask).generate(strength_frequency)
 
@@ -202,33 +208,33 @@ def gen_cert():
 
     # Merge Textcloud on the background
     textcloud = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_cloud.png')
-    # cert.paste(textcloud, (-100, 1250), textcloud)
+    cert.paste(textcloud, (-140, 1150), textcloud)
     # cert.paste(textcloud, (-175, 1100), textcloud)
-    cert.paste(textcloud, (200, 400), textcloud)
+    # cert.paste(textcloud, (200, 400), textcloud)
 
     # Soften the sketch egdes and merge sketch on the background
     sketchfile = OFOLDERPATH+TEAMMEMBERNAME+'_sketch.png'
-    soften_2_edges(sketchfile)
+    soften_edges(sketchfile)
     sktch = Image.open(sketchfile)
     sktch = sktch.resize(SKETCHSIZE)
-    cert.paste(sktch, (50, 50))
+    cert.paste(sktch, (0, 150))
 
     # Write Thankyou
-    font = ImageFont.truetype(FONT, 75)
+    font = ImageFont.truetype(FONT, 60)
     d = ImageDraw.Draw(cert)
-    d.text((885, 50), "Thank you ", font=font, fill=(247, 155, 68))
+    d.text((800, 250), "Thank you", font=font, fill=(255, 90, 16))
 
     # Write Name
-    font = ImageFont.truetype(FONT, 250)
+    font = ImageFont.truetype(FONT, 175)
     d = ImageDraw.Draw(cert)
-    d.text((860, 125), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(247, 155, 68))
+    d.text((800, 300), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(255, 90, 16))
 
     # Manager's sign
     sigfont = ImageFont.truetype(SIGNATUREFONT, 80)
-    d.text((1600, 2900), MGRNAME, font=sigfont, fill=(247, 155, 68))
+    d.text((1600, 2900), MGRNAME, font=sigfont, fill=(255, 90, 16))
 
     # Add the Date
     datefont = ImageFont.truetype(FONT, 30)
-    d.text((1600, 3030), 'Jan 2021', font=datefont, fill=(247, 155, 68))
+    d.text((1600, 3030), 'Jan 2021', font=datefont, fill=(255, 90, 16))
 
     cert.save(CERTPATH+TEAMMEMBERNAME+'.png',"PNG", quality=100)
