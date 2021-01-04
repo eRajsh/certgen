@@ -201,23 +201,19 @@ def gen_cloud():
 
 # Generate the Certificate
 def gen_cert():
-    # Merge cloud outline on the background
-    # cloudoutline = Image.open(MASKOUTLINE)
     cert = Image.open(BG)
-    # cert.paste(cloudoutline, (-60, 1100), cloudoutline)
 
     # Merge Textcloud on the background
     textcloud = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_cloud.png')
     cert.paste(textcloud, (-140, 1150), textcloud)
-    # cert.paste(textcloud, (-175, 1100), textcloud)
-    # cert.paste(textcloud, (200, 400), textcloud)
 
     # Soften the sketch egdes and merge sketch on the background
-    sketchfile = OFOLDERPATH+TEAMMEMBERNAME+'_sketch.png'
-    soften_edges(sketchfile)
-    sktch = Image.open(sketchfile)
-    sktch = sktch.resize(SKETCHSIZE)
-    cert.paste(sktch, (0, 150))
+    sketchfile = OFOLDERPATH + TEAMMEMBERNAME + '_sketch.png'
+    if (path.exists(sketchfile)):
+        soften_edges(sketchfile)
+        sktch = Image.open(sketchfile)
+        sktch = sktch.resize(SKETCHSIZE)
+        cert.paste(sktch, (0, 150))
 
     # Write Thankyou
     font = ImageFont.truetype(FONT, 60)
