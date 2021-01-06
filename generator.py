@@ -153,7 +153,18 @@ def soften_2_edges(sketch_file):
 
 # generate sketch
 def gen_sketch():
-    sketch.normalsketch(PHOTOPATH+TEAMMEMBERNAME+'.png', OFOLDERPATH, TEAMMEMBERNAME+'_sketch', 10)
+    # read the image
+    picture = PHOTOPATH+TEAMMEMBERNAME+'.png'
+    im = Image.open(picture)
+
+    # enhance image contrast
+    enhancer = ImageEnhance.Contrast(im)
+    factor = 1.5
+    im_output = enhancer.enhance(factor)
+    im_output.save(picture)
+
+    # generate the sketch
+    sketch.normalsketch(picture, OFOLDERPATH, TEAMMEMBERNAME+'_sketch', 10)
 
 
 # Generate Cloud
