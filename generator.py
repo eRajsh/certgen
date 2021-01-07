@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageDraw
-
+from PIL import ImageEnhance
 import argparse
 from os import path
 
