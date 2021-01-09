@@ -225,7 +225,7 @@ def gen_cert():
         soften_edges(sketchfile)
         sktch = Image.open(sketchfile)
         sktch = sktch.resize(SKETCHSIZE)
-        cert.paste(sktch, (0, 150))
+        cert.paste(sktch, (5, 150))
 
     # Write Thankyou
     font = ImageFont.truetype(FONT, 60)
