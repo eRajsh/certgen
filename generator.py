@@ -218,7 +218,7 @@ def gen_cert():
     # Merge Textcloud on the background
     textcloud = Image.open(OFOLDERPATH+TEAMMEMBERNAME+'_cloud.png')
     # cert.paste(textcloud, (-140, 1350), textcloud)
-    cert.paste(textcloud, (-160, 1350), textcloud)
+    cert.paste(textcloud, (-165, 1350), textcloud)
 
     # Soften the sketch egdes and merge sketch on the background
     sketchfile = OFOLDERPATH + TEAMMEMBERNAME + '_sketch.png'
@@ -231,19 +231,19 @@ def gen_cert():
     # Write Thankyou
     font = ImageFont.truetype(FONT, 60)
     d = ImageDraw.Draw(cert)
-    d.text((800, 250), "Thank you", font=font, fill=(255, 90, 16))
+    d.text((750, 120), "Thank you", font=font, fill=(255, 90, 16))
 
     # Write Name
     font = ImageFont.truetype(FONT, 175)
     d = ImageDraw.Draw(cert)
-    d.text((800, 300), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(255, 90, 16))
+    d.text((750, 180), TEAMMEMBERNAME.split(" ", 1)[0], font=font, fill=(255, 90, 16))
 
     # Manager's sign
     sigfont = ImageFont.truetype(SIGNATUREFONT, 80)
-    d.text((1600, 3115), MGRNAME, font=sigfont, fill=(255, 90, 16))
+    d.text((1600, 3120), MGRNAME, font=sigfont, fill=(255, 90, 16))
 
     # Add the Date
     datefont = ImageFont.truetype(FONT, 30)
-    d.text((1600, 3245), 'Jan 2021', font=datefont, fill=(255, 90, 16))
+    d.text((1600, 3250), 'Jan 2021', font=datefont, fill=(255, 90, 16))
 
     cert.save(CERTPATH+TEAMMEMBERNAME+'.png',"PNG", quality=100)
